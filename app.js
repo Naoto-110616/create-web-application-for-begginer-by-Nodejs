@@ -1,18 +1,49 @@
 "use strict";
 
-const port = 3001;
+const port = 3000;
 const http = require("http");
+const fs = require("fs");
 
-const server = http.createServer((request, response) => {
-    response.writeHead(200, {
-        "Content-Type": "text/html"
+function readFile(file, response) {
+    fs.readFile(`./${file}`, (errors, data) => {
+        if (errors) {
+            console.log("Error reading the file...");
+        }
+        response.end(data);
     });
+}
 
-    const responseMessage = "<h1>Hello Node.js!</h1>";
-    response.write(responseMessage);
-    response.end();
-    console.log(`Sent a response : ${responseMessage}`);
+const app = http.createServer((request, response) => {
+    if (request.url === "/" && request.method === "GET") {
+        response.writeHead(200, {
+            "Content-Type": "text/html"
+        });
+        readFile("view/index.html", response);
+    } else if (request.url === "/public/image/nodejs.png" && request.method === "GET") {
+        response.writeHead(200, {
+            "Content-Type": "image/png"
+        });
+        readFile("public/image/nodejs.png", response);
+    }
+    else if (request.url === "/svg" && request.method === "GET") {
+        response.writeHead(200, {
+            "Content-Type": "image/svg+xml"
+        })
+        readFile("public/image/node-js-brands.svg", response)
+    }
+    else if (request.url === "/public/css/style.css" && request.method === "GET") {
+        response.writeHead(200, {
+            "Content-Type": "text/css"
+        });
+        readFile("public/css/style.css", response);
+    } else {
+        response.writeHead(404, {
+            "Content-Type": "text/html"
+        });
+        response.end(`Not found : ${request.url}`);
+        console.log();
+    }
 });
 
-server.listen(port);
+app.listen(port);
 console.log(`The server has started and is listening on port number: ${port}`);
